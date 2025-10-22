@@ -1,0 +1,102 @@
+version: "3.8"
+services:
+  postgres:
+    image: public.ecr.aws/docker/library/postgres:16-alpine
+    container_name: blogs-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: blog_user
+      POSTGRES_PASSWORD: blog_pass_2024
+      POSTGRES_DB: blogs_cms
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U blog_user -d blogs_cms"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  strapi:
+    build:
+      context: ./blogs-cms
+      dockerfile: Dockerfile
+    container_name: blogs-strapi
+    restart: unless-stopped
+    env_file:
+      - ./blogs-cms/.env.production
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=512"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - strapi_uploads:/usr/src/app/public/uploads
+    # 不暴露对公网端口，保持仅容器网络访问
+    # 如需临时对外访问，可在维护窗口添加端口映射 1337:1337
+
+  web_a:
+    build:
+      context: ./blogs-web
+      dockerfile: Dockerfile
+    container_name: blogs-web-a
+    restart: unless-stopped
+    env_file:
+      - ./blogs-web/.env.a
+    environment:
+      NODE_ENV: "production"
+      NODE_OPTIONS: "--max-old-space-size=768"
+    depends_on:
+      - strapi
+    ports:
+      - "3001:3000"
+
+  web_b:
+    build:
+      context: ./blogs-web
+      dockerfile: Dockerfile
+    container_name: blogs-web-b
+    restart: unless-stopped
+    env_file:
+      - ./blogs-web/.env.b
+    environment:
+      NODE_ENV: "production"
+      NODE_OPTIONS: "--max-old-space-size=768"
+    depends_on:
+      - strapi
+    ports:
+      - "3002:3000"
+
+  web_c:
+    build:
+      context: ./blogs-web
+      dockerfile: Dockerfile
+    container_name: blogs-web-c
+    restart: unless-stopped
+    env_file:
+      - ./blogs-web/.env.c
+    environment:
+      NODE_ENV: "production"
+      NODE_OPTIONS: "--max-old-space-size=768"
+    depends_on:
+      - strapi
+    ports:
+      - "3003:3000"
+
+  nginx:
+    image: nginx:alpine
+    container_name: blogs-nginx
+    restart: unless-stopped
+    depends_on:
+      - web_a
+      - web_b
+      - web_c
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+
+volumes:
+  postgres_data:
+  strapi_uploads:

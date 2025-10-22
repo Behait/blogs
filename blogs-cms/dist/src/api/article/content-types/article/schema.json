@@ -1,0 +1,50 @@
+{
+    "kind": "collectionType",
+    "collectionName": "articles",
+    "info": {
+        "singularName": "article",
+        "pluralName": "articles",
+        "displayName": "Article",
+        "description": "站群文章"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "attributes": {
+        "title": { "type": "string", "required": true },
+        "slug": { "type": "uid", "targetField": "title", "required": true },
+        "summary": { "type": "text" },
+        "content": { "type": "richtext" },
+        "site": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::site.site",
+            "inversedBy": "articles"
+        },
+        "publishedAt": { "type": "datetime" },
+        "category": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::category.category",
+            "inversedBy": "articles"
+        },
+        "tags": {
+            "type": "relation",
+            "relation": "manyToMany",
+            "target": "api::tag.tag",
+            "mappedBy": "articles"
+        },
+        "comments": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::comment.comment",
+            "mappedBy": "article"
+        },
+        "distributionRecords": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::distribution-record.distribution-record",
+            "mappedBy": "article"
+        }
+    }
+}

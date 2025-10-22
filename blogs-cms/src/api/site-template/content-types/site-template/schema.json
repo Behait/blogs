@@ -1,0 +1,29 @@
+{
+  "kind": "collectionType",
+  "collectionName": "site_templates",
+  "info": {
+    "singularName": "site-template",
+    "pluralName": "site-templates",
+    "displayName": "Site Template",
+    "description": "站点模板配置"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "templateId": { "type": "uid", "targetField": "name", "required": true },
+    "description": { "type": "text" },
+    "preview": { "type": "media", "multiple": false },
+    "config": { "type": "json" },
+    "styles": { "type": "json" },
+    "layout": { "type": "json" },
+    "components": { "type": "json" },
+    "isActive": { "type": "boolean", "default": true },
+    "category": { 
+      "type": "enumeration", 
+      "enum": ["blog", "news", "portfolio", "corporate", "ecommerce"],
+      "default": "blog"
+    }
+  }
+}

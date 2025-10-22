@@ -1,0 +1,67 @@
+{
+  "kind": "collectionType",
+  "collectionName": "distribution_records",
+  "info": {
+    "singularName": "distribution-record",
+    "pluralName": "distribution-records",
+    "displayName": "Distribution Record",
+    "description": "Records of content distribution to different sites"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "article": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::article.article",
+      "inversedBy": "distributionRecords"
+    },
+    "distributionRule": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::content-distribution.content-distribution",
+      "inversedBy": "distributionRecords"
+    },
+    "targetSite": {
+      "type": "string",
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "success", "failed", "cancelled"],
+      "default": "pending",
+      "required": true
+    },
+    "distributedAt": {
+      "type": "datetime"
+    },
+    "errorMessage": {
+      "type": "text"
+    },
+    "metadata": {
+      "type": "json",
+      "description": "Additional metadata about the distribution"
+    },
+    "retryCount": {
+      "type": "integer",
+      "default": 0
+    },
+    "lastRetryAt": {
+      "type": "datetime"
+    },
+    "transformedData": {
+      "type": "json",
+      "description": "The transformed article data that was distributed"
+    },
+    "externalId": {
+      "type": "string",
+      "description": "ID of the article in the target site"
+    },
+    "syncHash": {
+      "type": "string",
+      "description": "Hash to detect content changes"
+    }
+  }
+}

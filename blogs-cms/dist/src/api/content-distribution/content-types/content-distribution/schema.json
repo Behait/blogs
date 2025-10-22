@@ -1,0 +1,77 @@
+{
+    "kind": "collectionType",
+    "collectionName": "content_distributions",
+    "info": {
+        "singularName": "content-distribution",
+        "pluralName": "content-distributions",
+        "displayName": "Content Distribution",
+        "description": "Content distribution rules for multi-site management"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "name": {
+            "type": "string",
+            "required": true,
+            "unique": true
+        },
+        "description": {
+            "type": "text"
+        },
+        "sourceCategories": {
+            "type": "json",
+            "required": true
+        },
+        "targetSites": {
+            "type": "json",
+            "required": true
+        },
+        "distributionRules": {
+            "type": "json",
+            "required": true
+        },
+        "syncInterval": {
+            "type": "integer",
+            "default": 3600,
+            "min": 300
+        },
+        "isActive": {
+            "type": "boolean",
+            "default": true
+        },
+        "priority": {
+            "type": "integer",
+            "default": 1,
+            "min": 1,
+            "max": 10
+        },
+        "lastRun": {
+            "type": "datetime"
+        },
+        "lastRunStatus": {
+            "type": "enumeration",
+            "enum": ["success", "error", "pending", "running"],
+            "default": "pending"
+        },
+        "errorMessage": {
+            "type": "text"
+        },
+        "statistics": {
+            "type": "json"
+        },
+        "conditions": {
+            "type": "json"
+        },
+        "transformations": {
+            "type": "json"
+        },
+        "distributionRecords": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::distribution-record.distribution-record",
+            "mappedBy": "distributionRule"
+        }
+    }
+}

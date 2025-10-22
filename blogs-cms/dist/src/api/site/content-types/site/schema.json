@@ -1,0 +1,28 @@
+{
+    "kind": "collectionType",
+    "collectionName": "sites",
+    "info": {
+        "singularName": "site",
+        "pluralName": "sites",
+        "displayName": "Site",
+        "description": "站点信息"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "attributes": {
+        "name": { "type": "string", "required": true },
+        "domain": { "type": "string", "required": true, "unique": true },
+        "enabled": { "type": "boolean", "default": true },
+        "theme": { "type": "json" },
+        "templateId": { "type": "string", "default": "default" },
+        "siteConfig": { "type": "json" },
+        "contentDistribution": { "type": "json" },
+        "articles": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::article.article",
+            "mappedBy": "site"
+        }
+    }
+}

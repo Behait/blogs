@@ -10,6 +10,12 @@ WORKDIR /usr/src/app
 # 复制 package.json 和 package-lock.json
 COPY package*.json ./
 
+# 设置 npm 镜像与重试策略以提升网络稳定性
+RUN npm config set registry https://registry.npmmirror.com
+RUN npm config set fetch-retries 5
+RUN npm config set fetch-retry-mintimeout 20000
+RUN npm config set fetch-retry-maxtimeout 120000
+
 # 安装所有依赖（包括开发依赖，构建需要）
 RUN npm ci
 

@@ -2,7 +2,12 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+# 设置 npm 镜像与重试策略以提升网络稳定性
+RUN npm config set registry https://registry.npmmirror.com
+RUN npm config set fetch-retries 5
+RUN npm config set fetch-retry-mintimeout 20000
+RUN npm config set fetch-retry-maxtimeout 120000
+RUN npm ci
 
 # 构建阶段
 FROM node:20-alpine AS builder

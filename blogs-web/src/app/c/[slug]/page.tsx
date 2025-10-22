@@ -3,11 +3,12 @@ import DynamicArticleCard from "@/components/DynamicArticleCard";
 import Pagination from "@/components/Pagination";
 import Breadcrumb, { generateCategoryBreadcrumb } from "@/components/Breadcrumb";
 import Link from "next/link";
+import type { Metadata } from 'next';
 
 export const revalidate = 3600;
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const { slug } = params;
   const categories = await fetchCategories();
   const category = Array.isArray(categories) ? categories.find((c: any) => c.slug === slug) : null;
   const name = category?.name || slug;
@@ -17,13 +18,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     description: `分类 ${name} 下的最新技术文章列表`,
     alternates: { canonical: `${siteUrl}/c/${slug}` },
     robots: { index: true, follow: true },
-  } as any;
+  };
 }
 
-export default async function CategoryPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams?: Promise<any>; }) {
-  const { slug } = await params;
-  const s = (await searchParams) || {};
-  const page = parseInt(s.page) || 1;
+export default async function CategoryPage({ params, searchParams }: { params: { slug: string }; searchParams?: { [key: string]: string | string[] | undefined } }) {
+  const { slug } = params;
+  const s = searchParams || {};
+  const page = parseInt(String((s as any).page || "1")) || 1;
   const pageSize = 20;
 
   const [categories, articlesData] = await Promise.all([

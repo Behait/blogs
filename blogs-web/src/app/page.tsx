@@ -22,7 +22,17 @@ export default async function Home({ searchParams }: { searchParams?: Record<str
   // 获取模板配置
   const template = 'default'; // 使用默认模板
 
-  const articles = articlesData?.items || [];
+  type ArticleItem = {
+    id: number;
+    title: string;
+    slug: string;
+    summary?: string;
+    site: string | null;
+    category?: string | { name: string };
+    tags?: string[];
+    publishedAt?: string;
+  };
+  const articles: ArticleItem[] = articlesData?.items || [];
   const totalArticles = articlesData?.pagination?.total || 0;
   const totalPages = articlesData?.pagination?.pageCount || 1;
   const currentPage = articlesData?.pagination?.page || 1;
@@ -158,12 +168,6 @@ export default async function Home({ searchParams }: { searchParams?: Record<str
               <Filters 
                 categories={categories} 
                 tags={tags} 
-                initial={{ 
-                  q: search, 
-                  category: "", 
-                  tag: "", 
-                  pageSize: pageSize 
-                }} 
               />
             </Suspense>
           </div>
@@ -196,9 +200,7 @@ export default async function Home({ searchParams }: { searchParams?: Record<str
                   >
                     <DynamicArticleCard 
                       article={article} 
-                      featured={index < 2} // 前两篇文章设为精选
-                      template={template}
-                      className="bg-white/80 backdrop-blur-sm border-gray-200/50 hover:border-blue-300/50 hover:shadow-2xl transition-all duration-300 optimize-transitions optimize-shadow-lg render-composite"
+                      featured={index < 2} 
                     />
                   </div>
                 ))}

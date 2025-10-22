@@ -21,6 +21,7 @@ COPY . .
 
 # 设置环境变量
 ENV NODE_ENV=production
+ENV NODE_OPTIONS=--max-old-space-size=1536
 
 # 构建应用程序（直接通过 node 调用 Strapi CLI，绕过可执行权限问题）
 RUN node ./node_modules/@strapi/strapi/bin/strapi.js build

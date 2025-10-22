@@ -81,11 +81,11 @@ export async function addInternalLinks(
     // 为每篇文章创建关键词匹配规则（加入词频/相似度评分）
     const MIN_ARTICLE_SCORE = 2; // 低于该分则不插入，避免泛词
 
-    const articleKeywords = availableArticles.map((article: Article) => {
+    const articleKeywords: ArticleKeyword[] = availableArticles.map((article: Article) => {
       const keywords: { text: string; priority: number; article: Article; weight: number; articleScore: number }[] = [];
 
-      const lower = (s: string) => s.trim().toLowerCase();
-      let articleScore = 0;
+       const lower = (s: string) => s.trim().toLowerCase();
+       let articleScore = 0;
 
       // 基于标题/标签/分类在当前内容中的出现频次估算相似度（标题采用分词累加）
       if (article.title) articleScore += countTokensScore(article.title, wordCounts, minKeywordLength) * 4;
@@ -269,3 +269,11 @@ function countTokensScore(text: string, counts: Record<string, number>, minLengt
   for (const t of tokens) s += counts[t] || 0;
   return s;
 }
+
+type ArticleKeyword = {
+  text: string;
+  priority: number;
+  article: Article;
+  weight: number;
+  articleScore: number;
+};

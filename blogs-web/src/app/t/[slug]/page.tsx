@@ -3,11 +3,12 @@ import DynamicArticleCard from "@/components/DynamicArticleCard";
 import Pagination from "@/components/Pagination";
 import Breadcrumb, { generateTagBreadcrumb } from "@/components/Breadcrumb";
 import Link from "next/link";
+import type { Metadata } from 'next';
 
 export const revalidate = 3600;
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const { slug } = params;
   const tags = await fetchTags();
   const tag = Array.isArray(tags) ? tags.find((t: any) => t.slug === slug) : null;
   const name = tag?.name || slug;
@@ -17,13 +18,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     description: `标签 ${name} 下的最新技术文章列表`,
     alternates: { canonical: `${siteUrl}/t/${slug}` },
     robots: { index: true, follow: true },
-  } as any;
+  };
 }
 
-export default async function TagPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams?: Promise<any>; }) {
-  const { slug } = await params;
-  const s = (await searchParams) || {};
-  const page = parseInt(s.page) || 1;
+export default async function TagPage({ params, searchParams }: { params: { slug: string }; searchParams?: { [key: string]: string | string[] | undefined } }) {
+  const { slug } = params;
+  const s = searchParams || {};
+  const page = parseInt(String((s as any).page || "1")) || 1;
   const pageSize = 20;
 
   const [tags, articlesData] = await Promise.all([
@@ -39,15 +40,15 @@ export default async function TagPage({ params, searchParams }: { params: Promis
   const breadcrumbItems = generateTagBreadcrumb(name);
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="mx-auto px-4 md:max-w-7xl md:px-6 py-8">
       <div className="mb-6">
         <Breadcrumb items={breadcrumbItems} />
       </div>
 
       {items.length ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {items.map((article: any, index: number) => (
-            <DynamicArticleCard key={article.id} article={article} featured={index < 2} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {items.map((article: any) => (
+            <DynamicArticleCard key={article.id} article={article} featured={false} />
           ))}
         </div>
       ) : (

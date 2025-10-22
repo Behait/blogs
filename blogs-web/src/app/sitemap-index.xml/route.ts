@@ -17,9 +17,14 @@ export async function GET(req: NextRequest) {
   const filters: string[] = [];
   if (siteId) filters.push(`filters[site][id][$eq]=${encodeURIComponent(siteId)}`);
 
-  // 获取文章总数以计算分片数量
-  const res = await cmsFetch(`/api/articles?fields=id&pagination[pageSize]=1${filters.length ? `&${filters.join('&')}` : ''}`);
-  const total: number = res?.meta?.pagination?.total ?? 0;
+  // 获取文章总数以计算分片数量（失败时回退为 0）
+  let total = 0;
+  try {
+    const res = await cmsFetch(`/api/articles?fields=id&pagination[pageSize]=1${filters.length ? `&${filters.join('&')}` : ''}`);
+    total = res?.meta?.pagination?.total ?? 0;
+  } catch (err) {
+    console.warn('sitemap-index.xml: fetch failed, fallback to 0');
+  }
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const now = new Date().toISOString();

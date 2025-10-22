@@ -8,6 +8,7 @@ import { TemplateProvider } from "@/components/TemplateProvider";
 import DynamicLayout from "@/components/DynamicLayout";
 import { headers } from "next/headers";
 import Script from "next/script";
+import type { Viewport } from "next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,32 +24,24 @@ const geistMono = Geist_Mono({
   preload: false, // 代码字体延迟加载
 });
 
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
+  colorScheme: "light",
+};
+
 export const metadata: Metadata = {
   title: "Blogs",
   description: "一个支持跨站评论的博客站群",
   keywords: "博客,文章,SEO,站群,评论",
   authors: [{ name: "Blogs Team" }],
   robots: "index, follow",
-  // 添加性能相关的meta标签
-  other: {
-    "theme-color": "#ffffff",
-    "color-scheme": "light",
-    "mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-status-bar-style": "default",
-    "apple-mobile-web-app-title": "Blogs",
-    "msapplication-TileColor": "#ffffff",
-    "msapplication-TileImage": "/favicon.ico",
-    "format-detection": "telephone=no",
-    "format-detection": "date=no",
-    "format-detection": "address=no",
-    "format-detection": "email=no",
-    "google": "notranslate",
-    "HandheldFriendly": "true",
-    "apple-touch-fullscreen": "yes",
-    "x5-fullscreen": "true",
-    "browsermode": "application",
-    "x-ua-compatible": "IE=edge,chrome=1",
+  // 使用 Next 内置格式检测配置，避免重复键
+  formatDetection: { telephone: false, address: false, email: false },
+  applicationName: "Blogs",
+  appleWebApp: {
+    title: "Blogs",
+    statusBarStyle: "default",
+    capable: true,
   },
 };
 
@@ -66,7 +59,8 @@ export default async function RootLayout({
   const headersList = await headers();
   const templateName = headersList.get("x-template");
   const host = headersList.get("host") || "";
-  const siteConfig = await fetchSiteConfig(host);
+  const siteData = await fetchSiteConfig(host);
+  const siteConfig = siteData?.siteConfig;
 
   let categories: any[] = [];
   let tags: any[] = [];

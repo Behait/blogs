@@ -51,7 +51,7 @@ export interface SiteTemplate {
   name: string;
   templateId: string;
   description: string;
-  category: string;
+  category: string | { name: string; slug?: string } | null;
   config: TemplateConfig;
   styles: TemplateStyles;
   layout: TemplateLayout;

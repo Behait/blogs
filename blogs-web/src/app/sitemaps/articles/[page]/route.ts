@@ -6,7 +6,7 @@ export const revalidate = 3600;
 
 const PAGE_SIZE = 500; // 分片大小
 
-export async function GET(req: NextRequest, { params }: { params: { page: string } }) {
+export async function GET(req: NextRequest, context: any) {
   ensureCurrentSiteIdFromDomain();
   const protocol = process.env.BAIDU_PUSH_PROTOCOL || 'https';
   const fallbackSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
@@ -16,7 +16,9 @@ export async function GET(req: NextRequest, { params }: { params: { page: string
   const baseUrl = `${protocol}://${siteDomain}`;
   const siteId = process.env.CURRENT_SITE_ID;
 
-  const page = Math.max(1, Number(params.page || '1'));
+  const maybeParams = context?.params;
+  const params = typeof maybeParams?.then === 'function' ? await maybeParams : maybeParams;
+  const page = Math.max(1, Number((params?.page ?? '1')));
 
   const filters: string[] = [];
   if (siteId) filters.push(`filters[site][id][$eq]=${encodeURIComponent(siteId)}`);

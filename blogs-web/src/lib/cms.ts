@@ -51,7 +51,7 @@ export const fetchArticles = withCache(
 
 export async function fetchArticleBySlug(slug: string) {
   const siteFilter = CURRENT_SITE_ID ? `&filters[site][id][$eq]=${encodeURIComponent(CURRENT_SITE_ID)}` : '';
-  const url = `/api/articles?filters[slug][$eq]=${encodeURIComponent(slug)}${siteFilter}&fields=title,slug,summary,content,publishedAt&populate[site][fields]=domain&populate[category][fields]=name,slug&populate[tags][fields]=id,name,slug&populate[comments][fields]=id,content,authorName,authorLink,status&populate[comments][sort]=createdAt:desc`;
+  const url = `/api/articles?filters[slug][$eq]=${encodeURIComponent(slug)}${siteFilter}&fields=title,slug,summary,content,publishedAt&populate[site][fields]=domain&populate[category][fields]=name,slug&populate[tags][fields]=id,name,slug&populate[comments][fields]=id,content,authorName,authorLink,status`;
   const res = await cmsFetch(url);
   const item = (res?.data ?? [])[0];
   if (!item) return null;
@@ -84,10 +84,43 @@ export function makeArticleUrl(article: { slug: string; site?: string | null }) 
   return `/${article.slug}`;
 }
 
+// 将 Strapi 返回的 item 统一扁平化，兼容 attributes 结构
+function flattenItem(item: any) {
+  if (!item) return item;
+  if (item.attributes && typeof item.attributes === 'object') {
+    const { attributes } = item;
+    return { id: item.id, ...attributes };
+  }
+  return item;
+}
+
 export const fetchCategories = withCache(
   async () => {
-    const data = await cmsFetch('/api/categories?populate=*');
-    return data.data || [];
+    // 仅拉取必要字段，减小负载
+    const listRes = await cmsFetch('/api/categories?fields=name,slug&sort=name:asc');
+    const rawList: any[] = Array.isArray(listRes?.data) ? listRes.data : [];
+    const categories = rawList.map(flattenItem).map((c: any) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      count: 0,
+    }));
+
+    // 并发计算每个分类在当前站点的文章数（使用 meta.pagination.total）
+    const siteFilter = CURRENT_SITE_ID ? `&filters[site][id][$eq]=${encodeURIComponent(CURRENT_SITE_ID)}` : '';
+    await Promise.all(
+      categories.map(async (c: any) => {
+        try {
+          const res = await cmsFetch(`/api/articles?fields=id&pagination[page]=1&pagination[pageSize]=1${siteFilter}&filters[category][slug][$eq]=${encodeURIComponent(c.slug)}`);
+          const total = Number(res?.meta?.pagination?.total || 0);
+          c.count = isNaN(total) ? 0 : total;
+        } catch {
+          c.count = 0;
+        }
+      })
+    );
+
+    return categories;
   },
   () => 'categories',
   600000 // 10分钟缓存
@@ -95,8 +128,31 @@ export const fetchCategories = withCache(
 
 export const fetchTags = withCache(
   async () => {
-    const data = await cmsFetch('/api/tags?populate=*');
-    return data.data || [];
+    // 仅拉取必要字段，减小负载
+    const listRes = await cmsFetch('/api/tags?fields=name,slug&sort=name:asc');
+    const rawList: any[] = Array.isArray(listRes?.data) ? listRes.data : [];
+    const tags = rawList.map(flattenItem).map((t: any) => ({
+      id: t.id,
+      name: t.name,
+      slug: t.slug,
+      count: 0,
+    }));
+
+    // 并发计算每个标签在当前站点的文章数
+    const siteFilter = CURRENT_SITE_ID ? `&filters[site][id][$eq]=${encodeURIComponent(CURRENT_SITE_ID)}` : '';
+    await Promise.all(
+      tags.map(async (t: any) => {
+        try {
+          const res = await cmsFetch(`/api/articles?fields=id&pagination[page]=1&pagination[pageSize]=1${siteFilter}&filters[tags][slug][$eq]=${encodeURIComponent(t.slug)}`);
+          const total = Number(res?.meta?.pagination?.total || 0);
+          t.count = isNaN(total) ? 0 : total;
+        } catch {
+          t.count = 0;
+        }
+      })
+    );
+
+    return tags;
   },
   () => 'tags',
   600000 // 10分钟缓存

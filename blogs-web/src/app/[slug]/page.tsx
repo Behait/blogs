@@ -6,6 +6,7 @@ import Breadcrumb, { generateArticleBreadcrumb } from "@/components/Breadcrumb";
 import CrossCommentButton from "@/components/CrossCommentButton";
 import CommentForm from "@/components/CommentForm";
 import Link from "next/link";
+import type { Metadata } from 'next';
 
 export const revalidate = 300;
 
@@ -21,11 +22,11 @@ export async function generateStaticParams() {
   }
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const { slug } = params;
   try {
-    const article = await fetchArticleBySlug(slug);
-    if (!article) return {} as any;
+    const article: any = await fetchArticleBySlug(slug);
+    if (!article) return {};
   
     const title = `${article.title} | 专业技术博客`;
     const description = article.summary || article.excerpt || article.title;
@@ -84,17 +85,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
           'max-snippet': -1,
         },
       },
-      other: {
-        'article:published_time': article.publishedAt,
-        'article:modified_time': article.updatedAt,
-        'article:author': article.author?.name || '技术编辑团队',
-        'article:section': article.category?.name || '技术',
-        'article:tag': article.tags?.map((tag: any) => tag.name).join(', '),
-      },
     };
   } catch (err) {
     console.warn(`[slug]/generateMetadata: fetch failed for slug=${slug}, returning empty metadata`);
-    return {} as any;
+    return {};
   }
 }
 

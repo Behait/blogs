@@ -31,8 +31,9 @@ services:
         condition: service_healthy
     volumes:
       - strapi_uploads:/usr/src/app/public/uploads
-    # 不暴露对公网端口，保持仅容器网络访问
-    # 如需临时对外访问，可在维护窗口添加端口映射 1337:1337
+    ports:
+      - "1337:1337"
+    # 临时对外访问端口映射，用于管理后台访问
 
   web_a:
     build:

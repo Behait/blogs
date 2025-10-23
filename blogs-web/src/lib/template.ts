@@ -108,7 +108,7 @@ export const DEFAULT_TEMPLATE: SiteTemplate = {
 // 获取站点模板
 export async function fetchSiteTemplate(templateId: string): Promise<SiteTemplate | null> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/site-templates?filters[templateId][$eq]=${templateId}&filters[isActive][$eq]=true`);
+    const response = await fetch(`${process.env.CMS_URL || process.env.NEXT_PUBLIC_CMS_URL}/api/site-templates?filters[templateId][$eq]=${templateId}&filters[isActive][$eq]=true`);
     if (!response.ok) return null;
     
     const data = await response.json();
@@ -122,7 +122,7 @@ export async function fetchSiteTemplate(templateId: string): Promise<SiteTemplat
 // 获取所有可用模板
 export async function fetchAvailableTemplates(): Promise<SiteTemplate[]> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/site-templates?filters[isActive][$eq]=true&sort=createdAt:desc`);
+    const response = await fetch(`${process.env.CMS_URL || process.env.NEXT_PUBLIC_CMS_URL}/api/site-templates?filters[isActive][$eq]=true&sort=createdAt:desc`);
     if (!response.ok) return [];
     
     const data = await response.json();
@@ -135,7 +135,7 @@ export async function fetchAvailableTemplates(): Promise<SiteTemplate[]> {
 
 // 获取站点配置
 export async function fetchSiteConfig(domain: string): Promise<{ template: SiteTemplate; siteConfig: SiteConfig } | null> {
-  const cmsUrl = process.env.NEXT_PUBLIC_CMS_URL;
+  const cmsUrl = process.env.CMS_URL || process.env.NEXT_PUBLIC_CMS_URL;
   // 当未配置 CMS 地址时，直接使用默认模板，避免报错
   if (!cmsUrl) {
     console.warn('CMS URL 未配置，使用默认模板');

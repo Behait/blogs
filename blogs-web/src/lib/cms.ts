@@ -1,6 +1,6 @@
 import { withCache, generateCacheKey } from './cache';
 
-export const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:1337';
+export const CMS_URL = process.env.CMS_URL || process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:1337';
 export const CURRENT_SITE_ID = process.env.CURRENT_SITE_ID || '';
 
 export async function cmsFetch(path: string, opts?: RequestInit) {
@@ -80,8 +80,7 @@ export function makeArticleUrl(article: { slug: string; site?: string | null }) 
   if (article.site && article.site !== 'localhost:3000') {
     return `https://${article.site}/articles/${article.slug}`;
   }
-  // 统一站内链接为 /<slug>
-  return `/${article.slug}`;
+  return `/articles/${article.slug}`;
 }
 
 // 将 Strapi 返回的 item 统一扁平化，兼容 attributes 结构
